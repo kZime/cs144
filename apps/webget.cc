@@ -6,8 +6,21 @@
 
 using namespace std;
 
+
 void get_URL(const string &host, const string &path) {
     // Your code here.
+
+    TCPSocket sock;
+    sock.connect(Address(host, "http"));
+    sock.write("GET " + path + " HTTP/1.1\r\n");
+    sock.write("Host: " + host + "\r\n");
+    sock.write("Connection: close\r\n\r\n");
+
+    while(!sock.eof()) {
+        cout << sock.read();
+    }
+    sock.close();
+
 
     // You will need to connect to the "http" service on
     // the computer whose name is in the "host" string,
@@ -49,3 +62,6 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 }
+
+
+// test
