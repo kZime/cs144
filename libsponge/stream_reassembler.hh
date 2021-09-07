@@ -5,15 +5,14 @@
 
 #include <cstdint>
 #include <string>
+#include <set>
 
 class SubStr {
   public:
-    string data;
-    size_t index;
-    SubStr(string data, size_t index) : data(data), index(index) {}
-    bool operator<(const SubStr& other) const {
-        return index < other.index;
-    }
+    std::string data;
+    std::size_t index;
+    SubStr(const std::string &data, const std::size_t &index);
+    bool operator<(const SubStr& other);
 };
 
 
@@ -24,18 +23,23 @@ class StreamReassembler {
     // Your code here -- add private members as necessary.
 
     ByteStream _output;  //!< The reassembled in-order byte stream
-    std::set
-    size_t _capacity;    //!< The maximum number of bytes
-    size_t _unassembled_num; //!< The number of bytes that have not yet been assembled
-    size_t _first_unassembled_index; //!< The index of the first byte that has not yet been assembled
-
-    set<SubStr> _unassembled; //!< The set of unassembled bytes
+    std::size_t _capacity;    //!< The maximum number of bytes
+    std::size_t _unassembled_num; //!< The number of bytes that have not yet been assembled
+    std::size_t _first_unassembled; //!< The index of the first byte that has not yet been assembled
+    std::set<SubStr> _unassembled; //!< The set of unassembled bytes
+    // bool _eof; //!< Whether the end of the stream has been reached
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
     //! and those that have not yet been reassembled.
-    StreamReassembler(const size_t capacity);
+    StreamReassembler(const std::size_t capacity);
+
+
+
+
+    void merge(std::string &data, std::size_t &index, std::set<SubStr>::iterator &it);
+    // void merge(std::string &dataa, std::size_t &indexa, std::set<SubStr>::iterator &it) {
 
     //! \brief Receive a substring and write any newly contiguous bytes into the stream.
     //!
@@ -57,7 +61,7 @@ class StreamReassembler {
     //!
     //! \note If the byte at a particular index has been pushed more than once, it
     //! should only be counted once for the purpose of this function.
-    size_t unassembled_bytes() const;
+    std::size_t unassembled_bytes() const;
 
     //! \brief Is the internal state empty (other than the output stream)?
     //! \returns `true` if no substrings are waiting to be assembled

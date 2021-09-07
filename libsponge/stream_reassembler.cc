@@ -1,5 +1,7 @@
 #include "stream_reassembler.hh"
 
+
+using namespace std;
 // Dummy implementation of a stream reassembler.
 
 // For Lab 1, please replace with a real implementation that passes the
@@ -10,61 +12,107 @@
 template <typename... Targs>
 void DUMMY_CODE(Targs &&... /* unused */) {}
 
-using namespace std;
+SubStr::SubStr(const std::string &_data, const std::size_t &_index) : data(_data), index(_index) {}
+
+bool operator<(const SubStr &a, const SubStr& other) {
+    return a.index < other.index;
+}
 
 StreamReassembler::StreamReassembler(const size_t capacity) : 
     _output(capacity),
     _capacity(capacity),
-    _unassembled(0),
-    _unasem() {}
+    _unassembled_num(0),
+    _first_unassembled(0),
+    _unassembled(){}
+    // _eof(false) {}
+
+
+
+void StreamReassembler::merge(string &dataa, size_t &indexa, set<SubStr>::iterator &it) {
+    string datab = it->data;
+    size_t indexb = it->index;
+
+    size_t l1 = indexa, l2 = indexb;
+    size_t r1 = indexa + dataa.size(), r2 = indexb + datab.size();
+    if (l1 > r2 or l2 > r1) {
+        return;
+    }
+    size_t l = max(l1, l2);
+    indexa = l;
+    if (l == l1) { // a is the left one
+        dataa += string(datab.begin() + r1 - l2, datab.begin());
+    } else {
+        datab += string(dataa.begin() + r2 - l1, dataa.begin());
+        dataa.assign(datab);
+    }
+}
 
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
-    _eof = _eof or eof;
-    if (data.empty() or index + data.size() <= _first_unassembled) {
-        if (_eof) {
-            _output.end_input();
-        }
-        return;
+    string tmpData = data;
+    size_t tmpIndex = index;
+    // _eof = _eof or eof;
+
+    // if (data.empty() or index + data.size() <= _first_unassembled) {
+    //     if (empty() and eof)
+    //         _output.end_input();
+    //     return;
+    // }
+
+    size_t first_unacceptable = _first_unassembled + _capacity - _output.buffer_size();
+
+    // deal with SubStr(tmpData, tmpIndex)
+    if (tmpIndex < _first_unassembled) {
+        tmpData = tmpData.substr(_first_unassembled - tmpIndex);
+        tmpIndex = _first_unassembled;
     }
 
-    if (index <= _first_unassembled) {
-        size_t writ_sz = _output.write(string(data.begin() + _first_unassembled - index, data.end()));
+    if (tmpIndex + tmpData.size() > first_unacceptable) {
+        tmpData = tmpData.substr(0, first_unacceptable - tmpIndex);
+    }
+
+
+    // right
+    auto it = _unassembled.lower_bound(SubStr(tmpData, tmpIndex));
+    while (it != _unassembled.end()) {
+        if (it->index > tmpIndex + tmpData.size()) break;
+        merge(tmpData, tmpIndex, it);
+        _unassembled_num -= it->data.size();
+        _unassembled.erase(it++);
+    }
+
+    // left
+    it = _unassembled.lower_bound(SubStr(tmpData, tmpIndex));
+    while (it != _unassembled.begin()) {
+        it--;
+        if (it->index + it->data.size() < tmpIndex) break;
+        merge(tmpData, tmpIndex, it);
+        _unassembled_num -= it->data.size();
+        _unassembled.erase(it);
+    }
+    
+
+
+    if (tmpIndex <= _first_unassembled) {
+        size_t writ_sz = _output.write(tmpData.substr(_first_unassembled - tmpIndex));
         _first_unassembled += writ_sz;
-        if (_eof) {
+        if (writ_sz == tmpData.size() and eof) {
             _output.end_input();
-            return;
         }
-        if (!_unassembled.empty()) {
-            if (_unassembled.front().index == _first_unassembled) {
-                size_t cnt = 0;
-                string str;
-                size_t pre = _first_unassembled;
-                for (auto tmp : _unassembled) {
-                    if (tmp.index == pre) {
-                        str += tmp.data;
-                        cnt++;
-                        pre += tmp.data.size();
-                    } else {
-                        break;
-                    }
-                }
-                while(cnt--) {
-                    _unassembled.erase(_unassembled.begin());
-                }
-                push_substring(str, _first_unassembled, eof);
-                if (_eof) {
-                    
-                }
-            }
-        }   
+    } else {
+        _unassembled.insert(SubStr(tmpData, tmpIndex));
+        _unassembled_num += tmpData.size();
+    }
+
+    if (empty() and eof) {
+        _output.end_input();
     }
 
 }
 
-size_t StreamReassembler::unassembled_bytes() const { return {}; }
+size_t StreamReassembler::unassembled_bytes() const { return {_unassembled_num}; }
 
-bool StreamReassembler::empty() const { return {}; }
+bool StreamReassembler::empty() const { return {_unassembled_num == 0}; }
