@@ -37,12 +37,12 @@ void StreamReassembler::merge(string &dataa, size_t &indexa, set<SubStr>::iterat
     if (l1 > r2 or l2 > r1) {
         return;
     }
-    size_t l = max(l1, l2);
+    size_t l = min(l1, l2);
     indexa = l;
     if (l == l1) { // a is the left one
-        dataa += string(datab.begin() + r1 - l2, datab.begin());
+        dataa += string(datab.begin() + r1 - l2, datab.end());
     } else {
-        datab += string(dataa.begin() + r2 - l1, dataa.begin());
+        datab += string(dataa.begin() + r2 - l1, dataa.end());
         dataa.assign(datab);
     }
 }
