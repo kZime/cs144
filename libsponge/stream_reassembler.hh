@@ -27,7 +27,7 @@ class StreamReassembler {
     std::size_t _unassembled_num; //!< The number of bytes that have not yet been assembled
     std::size_t _first_unassembled; //!< The index of the first byte that has not yet been assembled
     std::set<SubStr> _unassembled; //!< The set of unassembled bytes
-    // bool _eof; //!< Whether the end of the stream has been reached
+    bool _eof; //!< Whether the end of the stream has been reached
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
