@@ -56,11 +56,11 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     size_t tmpIndex = index;
     // _eof = _eof or eof;
 
-    // if (data.empty() or index + data.size() <= _first_unassembled) {
-    //     if (empty() and eof)
-    //         _output.end_input();
-    //     return;
-    // }
+    if (data.empty() or index + data.size() <= _first_unassembled) {
+        if (empty() and eof)
+            _output.end_input();
+        return;
+    }
 
     size_t first_unacceptable = _first_unassembled + _capacity - _output.buffer_size();
 
@@ -77,11 +77,12 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 
     // right
     auto it = _unassembled.lower_bound(SubStr(tmpData, tmpIndex));
+
     while (it != _unassembled.end()) {
         if (it->index > tmpIndex + tmpData.size()) break;
         merge(tmpData, tmpIndex, it);
         _unassembled_num -= it->data.size();
-        _unassembled.erase(it++);
+        _unassembled.erase(it);
     }
 
     // left

@@ -54,7 +54,7 @@ std::string ByteStream::read(const size_t len) {
     string s = peek_output(l);
     pop_output(l);
     // _size -= l;
-    _readn += l;
+    // _readn += l;
     return s;
 }
 
