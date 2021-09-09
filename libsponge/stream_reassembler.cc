@@ -28,19 +28,17 @@ StreamReassembler::StreamReassembler(const size_t capacity) :
 
 
 
-void StreamReassembler::merge(string &dataa, size_t &indexa, set<SubStr>::iterator &it) {
+size_t StreamReassembler::merge(string &dataa, size_t &indexa, set<SubStr>::iterator it) {
     string datab = it->data;
     size_t indexb = it->index;
 
     size_t l1 = indexa, l2 = indexb;
     size_t r1 = indexa + dataa.size(), r2 = indexb + datab.size();
     if (l1 > r2 or l2 > r1) {
-        return;
-    }
-    if (l1 <= l2 and r2 <= r1){
-        return;
+        return 0;
     }
     size_t l = min(l1, l2);
+    size_t del = datab.size();
     indexa = l;
     if (l == l1) { // a is the left one
         if (r2 > r1)
@@ -50,6 +48,7 @@ void StreamReassembler::merge(string &dataa, size_t &indexa, set<SubStr>::iterat
             datab += string(dataa.begin() + r2 - l1, dataa.end());
         dataa.assign(datab);
     }
+    return del;
 }
 
 
@@ -88,10 +87,11 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     auto it = _unassembled.lower_bound(SubStr(tmpData, tmpIndex));
 
     while (it != _unassembled.end()) {
-        if (it->index > tmpIndex + tmpData.size()) break;
-        merge(tmpData, tmpIndex, it);
-        _unassembled_num -= it->data.size();
-        _unassembled.erase(it++);
+        // if (it->index > tmpIndex + tmpData.size()) break;
+        if (size_t del = merge(tmpData, tmpIndex, it)) {
+            _unassembled.erase(it++);
+            _unassembled_num -= del;
+        } else break;
     }
 
 
@@ -104,15 +104,16 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     while (it != _unassembled.begin()) {
         if (it == _unassembled.end())
             it--;
-        if (it->index + it->data.size() < tmpIndex) break;
-        merge(tmpData, tmpIndex, it);
-        _unassembled_num -= it->data.size();
-        if (it != _unassembled.begin())
-            _unassembled.erase(it--);
-        else {
-            _unassembled.erase(it);
-            break;  
-        }
+        if (size_t del = merge(tmpData, tmpIndex, it)) {
+            _unassembled_num -= del;
+            if (it != _unassembled.begin())
+                _unassembled.erase(it--);
+            else {
+                _unassembled.erase(it);
+                break;  
+            }
+        } else break;
+        // if (it->index + it->data.size() < tmpIndex) break;
     }
     
 

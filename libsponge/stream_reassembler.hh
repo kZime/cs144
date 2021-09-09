@@ -38,7 +38,7 @@ class StreamReassembler {
 
 
 
-    void merge(std::string &data, std::size_t &index, std::set<SubStr>::iterator &it);
+    size_t merge(std::string &data, std::size_t &index, std::set<SubStr>::iterator it);
     // void merge(std::string &dataa, std::size_t &indexa, std::set<SubStr>::iterator &it) {
 
     //! \brief Receive a substring and write any newly contiguous bytes into the stream.
