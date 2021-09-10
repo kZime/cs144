@@ -31,16 +31,16 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 //! has a different ISN.
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
     uint64_t a;
-    if (isn < n) {
-        a = n - isn;
+    if (isn < n or isn == n) {
+        a = uint64_t(n.raw_value()) - uint64_t(isn.raw_value());
     } else {
-        a = uint64_t(n.raw_value()) + (1ll << 32ll) - isn.raw_value();
+        a = uint64_t(n.raw_value()) + (1ul << 32ll) - isn.raw_value();
     }
     uint64_t ans1, ans2;
     if (checkpoint >= a) {
-        uint64_t k = (checkpoint - a) >> 32ll;
-        ans1 = a + (k << 32ll);
-        ans2 = a + ((k + 1) << 32ll);
+        uint64_t k = (checkpoint - a) >> 32ul;
+        ans1 = a + (k << 32ul);
+        ans2 = a + ((k + 1) << 32ul);
         if ((checkpoint - ans1) < (ans2 - checkpoint)) {
             return ans1;
         } else return ans2;
