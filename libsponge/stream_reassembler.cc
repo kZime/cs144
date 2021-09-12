@@ -138,3 +138,9 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 size_t StreamReassembler::unassembled_bytes() const { return {_unassembled_num}; }
 
 bool StreamReassembler::empty() const { return {_unassembled_num == 0}; }
+
+size_t StreamReassembler::get_first_unassembled() const { return {_first_unassembled}; }
+
+size_t StreamReassembler::get_window_size() const { 
+    return {_first_unassembled + _capacity - _output.buffer_size()}; 
+}
