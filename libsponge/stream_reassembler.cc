@@ -142,5 +142,7 @@ bool StreamReassembler::empty() const { return {_unassembled_num == 0}; }
 size_t StreamReassembler::get_first_unassembled() const { return {_first_unassembled}; }
 
 size_t StreamReassembler::get_window_size() const { 
-    return {_first_unassembled + _capacity - _output.buffer_size()}; 
+    return {_capacity - _output.buffer_size()}; 
 }
+
+bool StreamReassembler::end_input() const { return {_output.input_ended()}; }
