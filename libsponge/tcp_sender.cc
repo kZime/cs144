@@ -20,19 +20,32 @@ using namespace std;
 TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const std::optional<WrappingInt32> fixed_isn)
     : _isn(fixed_isn.value_or(WrappingInt32{random_device()()}))
     , _initial_retransmission_timeout{retx_timeout}
-    , _stream(capacity) {}
+    , _stream(capacity) 
+    , _byte_in_flight(0)
+    , _consecutive_retransmissions(0) {}
 
-uint64_t TCPSender::bytes_in_flight() const { return {}; }
+uint64_t TCPSender::bytes_in_flight() const { return _byte_in_flight; }
 
-void TCPSender::fill_window() {}
+void TCPSender::fill_window() {
+
+}
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
-void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) { DUMMY_CODE(ackno, window_size); }
+void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) { 
+    DUMMY_CODE(ackno, window_size); 
+}
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
-void TCPSender::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
+void TCPSender::tick(const size_t ms_since_last_tick) { 
+    // DUMMY_CODE(ms_since_last_tick); 
 
-unsigned int TCPSender::consecutive_retransmissions() const { return {}; }
+}
 
-void TCPSender::send_empty_segment() {}
+unsigned int TCPSender::consecutive_retransmissions() const { 
+    return _consecutive_retransmissions; 
+}
+
+void TCPSender::send_empty_segment() {
+
+}
